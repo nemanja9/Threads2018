@@ -4,17 +4,21 @@
  */
 package music;
 
+import javax.swing.JTextArea;
+
 public class Synchronizer {
     
     private boolean firstVoiceFlag;
     private boolean secondVoiceFlag;
     private boolean choirFlag;
+    private JTextArea textArea;
 
-    public Synchronizer(boolean firstVoiceFlag, boolean secondVoiceFlag, boolean choirFlag) {
+    public Synchronizer(boolean firstVoiceFlag, boolean secondVoiceFlag, boolean choirFlag, JTextArea textArea) {
         super();
         this.firstVoiceFlag = firstVoiceFlag;
         this.secondVoiceFlag=secondVoiceFlag;
         this.choirFlag=choirFlag;
+        this.textArea=textArea;
     }
     
     public synchronized void singFirstVoice(String lyrics, int delay) {
@@ -53,8 +57,8 @@ public class Synchronizer {
         sing(lyrics, delay);
     }
     
-    private void sing(String lyrics, int delay) {
-        System.out.println(lyrics);
+    private String sing(String lyrics, int delay) {
+        textArea.append(lyrics+"\n");
         try {
             wait(delay);
         } catch (InterruptedException e) {
@@ -66,22 +70,23 @@ public class Synchronizer {
         	secondVoiceFlag=!secondVoiceFlag;
 //        	choirFlag=false;
         	notifyAll();
-        	return;
+        	return lyrics;
         }
         if(secondVoiceFlag) {
         	secondVoiceFlag=!secondVoiceFlag;
         	choirFlag=!choirFlag;
 //        	firstVoiceFlag=false;
         	notifyAll();
-        	return;
+        	return lyrics;
         }
         if(choirFlag) {
         	choirFlag=!choirFlag;
         	firstVoiceFlag=!firstVoiceFlag;
 //        	secondVoiceFlag=false;
         	notifyAll();
-        	return;
+        	return lyrics;
         }
+        return null;
     }
 
 }
