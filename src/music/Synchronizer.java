@@ -7,10 +7,14 @@ package music;
 public class Synchronizer {
     
     private boolean firstVoiceFlag;
+    private boolean secondVoiceFlag;
+    private boolean choirFlag;
 
-    public Synchronizer(boolean firstVoiceFlag) {
+    public Synchronizer(boolean firstVoiceFlag, boolean secondVoiceFlag, boolean choirFlag) {
         super();
         this.firstVoiceFlag = firstVoiceFlag;
+        this.secondVoiceFlag=secondVoiceFlag;
+        this.choirFlag=choirFlag;
     }
     
     public synchronized void singFirstVoice(String lyrics, int delay) {
@@ -26,7 +30,19 @@ public class Synchronizer {
     }
     
     public synchronized void singSecondVoice(String lyrics, int delay) {
-        while (firstVoiceFlag) {
+        while (!secondVoiceFlag) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        sing(lyrics, delay);
+    }
+    
+    public synchronized void singChoir(String lyrics, int delay) {
+        while (!choirFlag) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -45,8 +61,27 @@ public class Synchronizer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        firstVoiceFlag = !firstVoiceFlag;
-        notifyAll();
+        if(firstVoiceFlag) {
+        	firstVoiceFlag=!firstVoiceFlag;
+        	secondVoiceFlag=!secondVoiceFlag;
+//        	choirFlag=false;
+        	notifyAll();
+        	return;
+        }
+        if(secondVoiceFlag) {
+        	secondVoiceFlag=!secondVoiceFlag;
+        	choirFlag=!choirFlag;
+//        	firstVoiceFlag=false;
+        	notifyAll();
+        	return;
+        }
+        if(choirFlag) {
+        	choirFlag=!choirFlag;
+        	firstVoiceFlag=!firstVoiceFlag;
+//        	secondVoiceFlag=false;
+        	notifyAll();
+        	return;
+        }
     }
 
 }
